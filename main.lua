@@ -152,34 +152,36 @@ local function followTheShip()
   end
 end
 
-local function drawPointer()
-  if sunX < 0 or sunX > windowWidth or sunY < 0 or sunY > windowHeight then
+local function drawPointer(objX, objY)
+  objX = getAbsX(objX)
+  objY = getAbsY(objY)
+  if objX < 0 or objX > windowWidth or objY < 0 or objY > windowHeight then
     local centreX = windowWidth/2
     local centreY = windowHeight/2
-    local dx, dy = sunX - centreX, sunY - centreY
+    local dx, dy = objX - centreX, objY - centreY
     local angleA = math.deg(math.atan2(0 - centreX, 0 - centreY))
     local angleB = math.deg(math.atan2(windowWidth - centreX, 0 - centreY))
     local angleC = math.deg(math.atan2(windowWidth - centreX, windowHeight - centreY))
     local angleD = math.deg(math.atan2(0 - centreX, windowHeight - centreY))
-    local angleSun = math.deg(math.atan2(dx, dy))
+    local angleObj = math.deg(math.atan2(dx, dy))
     local indent = 20
     local x,y
     
-    if angleSun < angleA or angleSun > angleB then                                              -- AB
-      x = - (math.tan(math.rad(angleSun)) * (centreY - indent)) + centreX
-      love.graphics.draw(pointerSkin, x, indent, math.rad(-angleSun), 1, 1, 10, 10)
+    if angleObj < angleA or angleObj > angleB then                                              -- AB
+      x = - (math.tan(math.rad(angleObj)) * (centreY - indent)) + centreX
+      love.graphics.draw(pointerSkin, x, indent, math.rad(-angleObj), 1, 1, 10, 10)
       
-    elseif angleSun < angleB and angleSun > angleC then                                         -- BC
-      y = - ((indent - centreX) / math.tan(math.rad(angleSun))) + centreY
-      love.graphics.draw(pointerSkin, windowWidth - indent, y, math.rad(-angleSun), 1, 1, 10, 10)
+    elseif angleObj < angleB and angleObj > angleC then                                         -- BC
+      y = - ((indent - centreX) / math.tan(math.rad(angleObj))) + centreY
+      love.graphics.draw(pointerSkin, windowWidth - indent, y, math.rad(-angleObj), 1, 1, 10, 10)
       
-    elseif angleSun < angleC and angleSun > angleD then                                         -- CD
-      x = (math.tan(math.rad(angleSun)) * (centreY - indent)) + centreX
-      love.graphics.draw(pointerSkin, x, windowHeight - indent, math.rad(-angleSun), 1, 1, 10, 10)
+    elseif angleObj < angleC and angleObj > angleD then                                         -- CD
+      x = (math.tan(math.rad(angleObj)) * (centreY - indent)) + centreX
+      love.graphics.draw(pointerSkin, x, windowHeight - indent, math.rad(-angleObj), 1, 1, 10, 10)
       
-    elseif angleSun < angleD and angleSun > angleA then                                         -- DA
-      y = ((indent - centreX) / math.tan(math.rad(angleSun))) + centreY
-      love.graphics.draw(pointerSkin, indent, y, math.rad(-angleSun), 1, 1, 10, 10)
+    elseif angleObj < angleD and angleObj > angleA then                                         -- DA
+      y = ((indent - centreX) / math.tan(math.rad(angleObj))) + centreY
+      love.graphics.draw(pointerSkin, indent, y, math.rad(-angleObj), 1, 1, 10, 10)
       
     end
     --love.graphics.line(centreX, centreY, sunX, sunY)
@@ -228,7 +230,6 @@ end
 
 function love.draw()
   love.graphics.draw(background, windowWidth/2, windowHeight/2, 0, 1, 1, backgroundWidth/2, backgroundHeight/2)
-  drawPointer()
   love.graphics.circle("fill", getAbsX(obj.sun.x), getAbsY(obj.sun.y), 10)
   love.graphics.draw(obj.ship.skin, getAbsX(obj.ship.x), getAbsY(obj.ship.y), math.rad(obj.ship.r), 1, 1, 10, 10)
   love.graphics.circle("fill", getAbsX(obj.planet1.x), getAbsY(obj.planet1.y), 5)
@@ -254,5 +255,9 @@ function love.draw()
       love.graphics.points(getAbsX(v[1]),getAbsY(v[2]))
     end
   end
+  love.graphics.setColor(1, 0.8, 0)
+  drawPointer(obj.sun.x, obj.sun.y)
+  love.graphics.setColor(0.7, 0.7, 1)
+  drawPointer(obj.ship.x, obj.ship.y)
   love.graphics.setColor(1, 1, 1)
 end
