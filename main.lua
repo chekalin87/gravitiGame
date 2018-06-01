@@ -15,7 +15,7 @@ local mouseY
 local pause = false
 local speedUp = 0.01
 local speedDown = -0.01
-local background = love.graphics.newImage("images/background.jpg")
+local background = love.graphics.newImage("images/back.png")
 local pointerSkin = love.graphics.newImage("images/pointer.png")
 local soundTrack = love.audio.newSource("sounds/Rainstep.mp3", "static")
 local backgroundWidth = background:getWidth()
@@ -43,13 +43,13 @@ function love.load()
     y = obj.sun.y - 100,
     sx = 4.5,
     sy = 0,
-    r = 45,
+    angle = 45,
     skin = love.graphics.newImage("images/ship.png"),
     track = 1000}
   
-  obj.planet3 = {x = obj.sun.x, y = obj.sun.y - 200, sx = 3.2, sy = 0, tag = "planet", track = 400}
-  obj.planet2 = {x = 41.26, y = -130.61, sx = 3.9, sy = 0.83, tag = "planet", track = 400}
-  obj.planet1 = {x = 24.798, y = -51.2347, sx = 5.5987, sy = 2.2719, tag = "planet", track = 400}
+  obj.planet3 = {x = obj.sun.x, y = obj.sun.y - 200, sx = 3.2, sy = 0, r = 25, tag = "planet", skin = love.graphics.newImage("images/planet1.png"), angle = 45, speedRot = -5, track = 400}
+  obj.planet2 = {x = 41.26, y = -130.61, sx = 3.9, sy = 0.83, r = 15, tag = "planet", skin = love.graphics.newImage("images/planet2.png"), angle = 45, speedRot = 8, track = 250}
+  obj.planet1 = {x = 255.36, y = 237, sx = -1.58, sy = 1.765, r = 20, tag = "planet", skin = love.graphics.newImage("images/planet3.png"), angle = 45, speedRot = 3, track = 850}
 end
 
 function love.keyreleased(key)
@@ -102,7 +102,7 @@ function love.mousepressed(x, y, button)
   if button == 1 and not pause then 
     x = getRelX(x)
     y = getRelY(y)
-    local speed = 1
+    local speed = 5
     local dist = math.sqrt((obj.ship.x - x)^2 + (obj.ship.y - y)^2)
     local coof = dist/speed
     local distX = x - obj.ship.x
@@ -126,11 +126,11 @@ end
 local function acceleration(direction)
   local sy
   if direction == "w" then
-    sy = math.sin(math.rad(obj.ship.r)) * speedUp
+    sy = math.sin(math.rad(obj.ship.angle)) * speedUp
   elseif direction == "s" then
-    sy = math.sin(math.rad(obj.ship.r)) * speedDown
+    sy = math.sin(math.rad(obj.ship.angle)) * speedDown
   end
-  local sx = sy / math.tan(math.rad(obj.ship.r))
+  local sx = sy / math.tan(math.rad(obj.ship.angle))
   obj.ship.sx = obj.ship.sx + sx
   obj.ship.sy = obj.ship.sy + sy
 end
@@ -203,15 +203,15 @@ function love.update(dt)
       changePos(bul[i])
     end
     if love.keyboard.isDown('d') then
-    obj.ship.r = obj.ship.r + 2
-      if obj.ship.r >= 362 then
-        obj.ship.r = 2
+    obj.ship.angle = obj.ship.angle + 2
+      if obj.ship.angle >= 362 then
+        obj.ship.angle = 2
       end
     end
     if love.keyboard.isDown('a') then
-      obj.ship.r = obj.ship.r - 2
-      if obj.ship.r <= 0 then
-        obj.ship.r = 360
+      obj.ship.angle = obj.ship.angle - 2
+      if obj.ship.angle <= 0 then
+        obj.ship.angle = 360
       end
     end
     if love.keyboard.isDown('w') then acceleration("w") end
@@ -232,12 +232,27 @@ end
 
 function love.draw()
   love.graphics.draw(background, windowWidth/2, windowHeight/2, 0, 1, 1, backgroundWidth/2, backgroundHeight/2)
-  love.graphics.draw(obj.sun.skin, getAbsX(obj.sun.x), getAbsY(obj.sun.y), 0, 1, 1, 128, 128)
-  love.graphics.draw(obj.ship.skin, getAbsX(obj.ship.x), getAbsY(obj.ship.y), math.rad(obj.ship.r), 1, 1, 10, 10)
+  for k,v in pairs(points) do
+    local t = 1
+    local l = #v
+    local c
+    for k,v in pairs(v) do
+      t = t + 1
+      c = t/l
+      love.graphics.setColor(c, 0.3, 0.5)
+      love.graphics.points(getAbsX(v[1]),getAbsY(v[2]))
+    end
+  end
+  love.graphics.setColor(1, 1, 1)
   
-  for k,v in pairs(obj) do
+  love.graphics.draw(obj.sun.skin, getAbsX(obj.sun.x), getAbsY(obj.sun.y), 0, 1, 1, 128, 128)
+  love.graphics.draw(obj.ship.skin, getAbsX(obj.ship.x), getAbsY(obj.ship.y), math.rad(obj.ship.angle), 1, 1, 10, 10)
+  
+  for k,v in pairs(obj) do 
     if v.tag == "planet" then
-      love.graphics.circle("fill", getAbsX(v.x), getAbsY(v.y), 5)
+      
+      v.angle = v.angle + v.speedRot
+      love.graphics.draw(v.skin, getAbsX(v.x), getAbsY(v.y), math.rad(v.angle), v.r/30, v.r/30, 15, 15)
     end
   end
   
@@ -249,18 +264,6 @@ function love.draw()
   love.graphics.print("speed: " .. math.sqrt((obj.ship.sx)^2 + (obj.ship.sy)^2), 10, 40)
   love.graphics.print("shipData: x> ".. obj.ship.x .."y>".. obj.ship.y .."sx>".. obj.ship.sx .."sy>".. obj.ship.sy, 10, windowHeight - 20) -- настройка планет
 
-  for k,v in pairs(points) do
-  local t = 1
-  local l = #v
-  local c
-    for k,v in pairs(v) do
-      t = t + 1
-      c = t/l
-     
-      love.graphics.setColor(c, 0.3, 0.5)
-      love.graphics.points(getAbsX(v[1]),getAbsY(v[2]))
-    end
-  end
   love.graphics.setColor(1, 0.8, 0)
   drawPointer(obj.sun.x, obj.sun.y)
   love.graphics.setColor(0.7, 0.7, 1)
