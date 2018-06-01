@@ -7,7 +7,7 @@ local fullscreen = false
 local obj = {}
 local bul = {}
 local sunX = windowWidth/2            --абсолютные координаты солнца
-local sunY = windowHeight/2
+local sunY = windowHeight/2           --относительная сетка координат считается от него
 local swingCam = false
 local follow = false
 local mouseX
@@ -36,7 +36,8 @@ function love.load()
   love.window.setTitle("Gravity")
   love.window.setFullscreen(fullscreen, "desktop")
   print(windowHeight, windowWidth)
-  obj.sun = {x = getRelX(sunX), y = getRelY(sunY)}
+  
+  obj.sun = {x = getRelX(sunX), y = getRelY(sunY), skin = love.graphics.newImage("images/sun.png")}
   
   obj.ship = {x = obj.sun.x,
     y = obj.sun.y - 100,
@@ -46,9 +47,9 @@ function love.load()
     skin = love.graphics.newImage("images/ship.png"),
     track = 1000}
   
-  obj.planet3 = {x = obj.sun.x, y = obj.sun.y - 200, sx = 3.2, sy = 0, track = 400}
-  obj.planet2 = {x = 41.26, y = -130.61, sx = 3.9, sy = 0.83, track = 400}
-  obj.planet1 = {x = 24.798, y = -51.2347, sx = 5.5987, sy = 2.2719, track = 400}
+  obj.planet3 = {x = obj.sun.x, y = obj.sun.y - 200, sx = 3.2, sy = 0, tag = "planet", track = 400}
+  obj.planet2 = {x = 41.26, y = -130.61, sx = 3.9, sy = 0.83, tag = "planet", track = 400}
+  obj.planet1 = {x = 24.798, y = -51.2347, sx = 5.5987, sy = 2.2719, tag = "planet", track = 400}
 end
 
 function love.keyreleased(key)
@@ -61,7 +62,8 @@ function love.keyreleased(key)
     windowWidth = love.graphics.getWidth()
     sunX = tsX + windowWidth/2
     sunY = tsY + windowHeight/2
-    obj.sun = {x = getRelX(sunX), y = getRelY(sunY)}
+    obj.sun.x = getRelX(sunX)
+    obj.sun.y = getRelY(sunY)
   elseif key == "space" then 
     pause = not pause
   elseif key == "f" then 
@@ -152,7 +154,7 @@ local function followTheShip()
   end
 end
 
-local function drawPointer(objX, objY)
+local function drawPointer(objX, objY)  --принимает относительные координаты оьеков
   objX = getAbsX(objX)
   objY = getAbsY(objY)
   if objX < 0 or objX > windowWidth or objY < 0 or objY > windowHeight then
@@ -184,8 +186,6 @@ local function drawPointer(objX, objY)
       love.graphics.draw(pointerSkin, indent, y, math.rad(-angleObj), 1, 1, 10, 10)
       
     end
-    --love.graphics.line(centreX, centreY, sunX, sunY)
-
   end
 end
 
@@ -193,10 +193,12 @@ function love.update(dt)
   if  not pause then
     trackPoints()
     
-    changePos(obj.ship)
-    changePos(obj.planet1)
-    changePos(obj.planet2)
-    changePos(obj.planet3)
+    for k,v in pairs(obj) do
+      if k ~= "sun" then
+        changePos(v)
+      end    
+    end
+    
     for i=1, #bul do
       changePos(bul[i])
     end
@@ -230,11 +232,15 @@ end
 
 function love.draw()
   love.graphics.draw(background, windowWidth/2, windowHeight/2, 0, 1, 1, backgroundWidth/2, backgroundHeight/2)
-  love.graphics.circle("fill", getAbsX(obj.sun.x), getAbsY(obj.sun.y), 10)
+  love.graphics.draw(obj.sun.skin, getAbsX(obj.sun.x), getAbsY(obj.sun.y), 0, 1, 1, 128, 128)
   love.graphics.draw(obj.ship.skin, getAbsX(obj.ship.x), getAbsY(obj.ship.y), math.rad(obj.ship.r), 1, 1, 10, 10)
-  love.graphics.circle("fill", getAbsX(obj.planet1.x), getAbsY(obj.planet1.y), 5)
-  love.graphics.circle("fill", getAbsX(obj.planet2.x), getAbsY(obj.planet2.y), 5)
-  love.graphics.circle("fill", getAbsX(obj.planet3.x), getAbsY(obj.planet3.y), 5)
+  
+  for k,v in pairs(obj) do
+    if v.tag == "planet" then
+      love.graphics.circle("fill", getAbsX(v.x), getAbsY(v.y), 5)
+    end
+  end
+  
   for i=1, #bul do
     love.graphics.circle("fill", getAbsX(bul[i].x), getAbsY(bul[i].y), 2)
   end
