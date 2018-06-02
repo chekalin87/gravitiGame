@@ -22,6 +22,7 @@ local backgroundWidth = background:getWidth()
 local backgroundHeight = background:getHeight()
 print(backgroundWidth, backgroundHeight)
 local points = {}
+local cursor = love.mouse.newCursor("images/cursor2.png", 10, 10 )
 
 local function getRelX(x) return x - sunX end
 local function getAbsX(x) return x + sunX end
@@ -29,7 +30,7 @@ local function getRelY(y) return y - sunY end
 local function getAbsY(y) return y + sunY end
 
 function love.load()
-  
+  love.mouse.setCursor( cursor )
   menu.boo()
   soundTrack:setLooping(true)
   soundTrack:play()
@@ -47,7 +48,7 @@ function love.load()
     skin = love.graphics.newImage("images/ship.png"),
     track = 1000}
   
-  obj.planet3 = {x = obj.sun.x, y = obj.sun.y - 200, sx = 3.2, sy = 0, r = 25, tag = "planet", skin = love.graphics.newImage("images/planet1.png"), angle = 45, speedRot = -5, track = 400}
+  obj.planet3 = {x = obj.sun.x, y = obj.sun.y - 200, sx = 3.2, sy = 0, r = 25, tag = "planet", skin = love.graphics.newImage("images/planet4.png"), angle = 45, speedRot = -5, track = 400}
   obj.planet2 = {x = 41.26, y = -130.61, sx = 3.9, sy = 0.83, r = 15, tag = "planet", skin = love.graphics.newImage("images/planet2.png"), angle = 45, speedRot = 8, track = 250}
   obj.planet1 = {x = 255.36, y = 237, sx = -1.58, sy = 1.765, r = 20, tag = "planet", skin = love.graphics.newImage("images/planet3.png"), angle = 45, speedRot = 3, track = 850}
 end
