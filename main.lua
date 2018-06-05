@@ -156,35 +156,43 @@ local function followTheShip()
 end
 
 local function drawPointer(objX, objY)  --принимает относительные координаты оьеков
+  
   objX = getAbsX(objX)
   objY = getAbsY(objY)
-  if objX < 0 or objX > windowWidth or objY < 0 or objY > windowHeight then
+  local up = 50
+  local down = 100
+  local left = 150
+  local right = 20
+  
+  if objX < left or objX > windowWidth - right or objY < up or objY > windowHeight - down then -- откорректировать после настройки GUI
+
+    --local indent = 10
     local centreX = windowWidth/2
     local centreY = windowHeight/2
     local dx, dy = objX - centreX, objY - centreY
-    local angleA = math.deg(math.atan2(0 - centreX, 0 - centreY))
-    local angleB = math.deg(math.atan2(windowWidth - centreX, 0 - centreY))
-    local angleC = math.deg(math.atan2(windowWidth - centreX, windowHeight - centreY))
-    local angleD = math.deg(math.atan2(0 - centreX, windowHeight - centreY))
+    local angleA = math.deg(math.atan2(left - centreX, up - centreY))
+    local angleB = math.deg(math.atan2(windowWidth-right - centreX, up - centreY))
+    local angleC = math.deg(math.atan2(windowWidth-right - centreX, windowHeight-down - centreY))
+    local angleD = math.deg(math.atan2(left - centreX, windowHeight-down - centreY))
     local angleObj = math.deg(math.atan2(dx, dy))
-    local indent = 20
-    local x,y
     
-    if angleObj < angleA or angleObj > angleB then                                              -- AB
-      x = - (math.tan(math.rad(angleObj)) * (centreY - indent)) + centreX
-      love.graphics.draw(pointerSkin, x, indent, math.rad(-angleObj), 1, 1, 10, 10)
+    local x,y
+    -- абсолютные координаты
+    if angleObj < angleA or angleObj > angleB then                                              -- AB верх
+      x = - (math.tan(math.rad(angleObj)) * (centreY - up)) + centreX
+      love.graphics.draw(pointerSkin, x, up, math.rad(-angleObj), 1, 1, 10, 10)
       
-    elseif angleObj < angleB and angleObj > angleC then                                         -- BC
-      y = - ((indent - centreX) / math.tan(math.rad(angleObj))) + centreY
-      love.graphics.draw(pointerSkin, windowWidth - indent, y, math.rad(-angleObj), 1, 1, 10, 10)
+    elseif angleObj < angleB and angleObj > angleC then                                         -- BC право
+      y = - ((right - centreX) / math.tan(math.rad(angleObj))) + centreY
+      love.graphics.draw(pointerSkin, windowWidth - right, y, math.rad(-angleObj), 1, 1, 10, 10)
       
-    elseif angleObj < angleC and angleObj > angleD then                                         -- CD
-      x = (math.tan(math.rad(angleObj)) * (centreY - indent)) + centreX
-      love.graphics.draw(pointerSkin, x, windowHeight - indent, math.rad(-angleObj), 1, 1, 10, 10)
+    elseif angleObj < angleC and angleObj > angleD then                                         -- CD низ
+      x = (math.tan(math.rad(angleObj)) * (centreY - down)) + centreX
+      love.graphics.draw(pointerSkin, x, windowHeight - down, math.rad(-angleObj), 1, 1, 10, 10)
       
-    elseif angleObj < angleD and angleObj > angleA then                                         -- DA
-      y = ((indent - centreX) / math.tan(math.rad(angleObj))) + centreY
-      love.graphics.draw(pointerSkin, indent, y, math.rad(-angleObj), 1, 1, 10, 10)
+    elseif angleObj < angleD and angleObj > angleA then                                         -- DA лево
+      y = ((left - centreX) / math.tan(math.rad(angleObj))) + centreY
+      love.graphics.draw(pointerSkin, left, y, math.rad(-angleObj), 1, 1, 10, 10)
       
     end
   end
